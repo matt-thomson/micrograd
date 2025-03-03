@@ -72,6 +72,10 @@ impl Value {
         self.inner.borrow().value
     }
 
+    fn gradient(&self) -> f64 {
+        self.inner.borrow().gradient
+    }
+
     pub fn tanh(self) -> Value {
         let exp = (self.value() * 2.0).exp();
 
@@ -81,6 +85,23 @@ impl Value {
             operation: Operation::Tanh(self.inner.clone()),
         }
         .into()
+    }
+
+    pub fn backward(&self) {
+        match &self.inner.borrow().operation {
+            Operation::Constant => {}
+            Operation::Add(left, right) => {
+                left.borrow_mut().gradient = self.gradient();
+                right.borrow_mut().gradient = self.gradient();
+            }
+            Operation::Mul(left, right) => {
+                left.borrow_mut().gradient = self.gradient() * right.borrow().gradient;
+                right.borrow_mut().gradient = self.gradient() * left.borrow().gradient;
+            }
+            Operation::Tanh(value) => {
+                value.borrow_mut().gradient = self.gradient() * (1.0 - self.value());
+            }
+        }
     }
 }
 
