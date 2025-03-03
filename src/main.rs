@@ -3,12 +3,12 @@ use micrograd::{MLP, Value};
 fn main() {
     let mlp = MLP::new(3, &[4, 4, 1]);
 
-    for _ in 0..100 {
+    for _ in 0..10000 {
         let loss = find_loss(&mlp);
         dbg!(loss.value());
 
         loss.backward();
-        mlp.step(0.001);
+        mlp.step(0.01);
     }
 }
 
