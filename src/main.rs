@@ -1,8 +1,8 @@
-use micrograd::Layer;
+use micrograd::MLP;
 
 fn main() {
-    let neuron = Layer::new(2, 3);
-    let result = neuron.calculate(&[2.0.into(), 3.0.into()]);
+    let mlp = MLP::new(3, &[4, 4, 1]);
+    let result = mlp.calculate(&[2.0.into(), 3.0.into(), (-1.0).into()]);
 
     dbg!(result);
 }
