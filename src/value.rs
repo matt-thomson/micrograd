@@ -54,7 +54,10 @@ mod tests {
         let b: Value = (-3.0).into();
         let c: Value = (10.0).into();
         let d = a * b + c;
+        let f: Value = (-2.0).into();
 
-        assert_eq!(d.data, 4.0);
+        let l = d * f;
+
+        assert_eq!(l.data, -8.0);
     }
 }
