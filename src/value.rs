@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::ops::{Add, Mul};
 use std::rc::Rc;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Value {
     inner: Rc<RefCell<ValueInner>>,
 }
@@ -131,5 +131,21 @@ mod tests {
         let result = a.tanh();
 
         assert_float_relative_eq!(result.value(), 0.96402758008);
+    }
+
+    #[test]
+    fn should_backpropagate() {
+        let x1: Value = (2.0).into();
+        let x2: Value = (0.0).into();
+        let w1: Value = (-3.0).into();
+        let w2: Value = (1.0).into();
+        let b: Value = (6.88137358701957432).into();
+
+        let n = (x1.clone() * w1.clone()) + (x2.clone() * w2.clone()) + b.clone();
+        let o = n.clone().tanh();
+
+        o.backward();
+
+        assert_float_relative_eq!(n.gradient(), 0.5);
     }
 }
