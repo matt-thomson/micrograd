@@ -101,8 +101,8 @@ impl ValueInner {
                 right.borrow().backward();
             }
             Operation::Mul(left, right) => {
-                left.borrow_mut().gradient = self.gradient * right.borrow().gradient;
-                right.borrow_mut().gradient = self.gradient * left.borrow().gradient;
+                left.borrow_mut().gradient = self.gradient * right.borrow().value;
+                right.borrow_mut().gradient = self.gradient * left.borrow().value;
 
                 left.borrow().backward();
                 right.borrow().backward();
