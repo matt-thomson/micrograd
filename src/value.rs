@@ -47,7 +47,7 @@ impl Add<Value> for Value {
     fn add(self, rhs: Value) -> Self::Output {
         ValueInner {
             value: self.value() + rhs.value(),
-            gradient: 1.0,
+            gradient: 0.0,
             operation: Operation::Add(self.inner.clone(), rhs.inner.clone()),
         }
         .into()
@@ -60,7 +60,7 @@ impl Mul<Value> for Value {
     fn mul(self, rhs: Value) -> Self::Output {
         ValueInner {
             value: self.value() * rhs.value(),
-            gradient: 1.0,
+            gradient: 0.0,
             operation: Operation::Mul(self.inner.clone(), rhs.inner.clone()),
         }
         .into()
@@ -77,13 +77,14 @@ impl Value {
 
         ValueInner {
             value: (exp - 1.0) / (exp + 1.0),
-            gradient: 1.0,
+            gradient: 0.0,
             operation: Operation::Tanh(self.inner.clone()),
         }
         .into()
     }
 
     pub fn backward(&self) {
+        self.inner.borrow_mut().gradient = 1.0;
         self.inner.borrow().backward();
     }
 }
