@@ -68,12 +68,8 @@ impl Mul<Value> for Value {
 }
 
 impl Value {
-    pub fn value(&self) -> f64 {
+    fn value(&self) -> f64 {
         self.inner.borrow().value
-    }
-
-    fn gradient(&self) -> f64 {
-        self.inner.borrow().gradient
     }
 
     pub fn tanh(self) -> Value {
@@ -93,7 +89,7 @@ impl Value {
 }
 
 impl ValueInner {
-    pub fn backward(&self) {
+    fn backward(&self) {
         match &self.operation {
             Operation::Constant => {}
             Operation::Add(left, right) => {
@@ -160,8 +156,8 @@ mod tests {
 
         o.backward();
 
-        assert_float_relative_eq!(n.gradient(), 0.5);
-        assert_float_relative_eq!(w1.gradient(), 0.25);
-        assert_float_relative_eq!(w2.gradient(), 0.0);
+        assert_float_relative_eq!(n.inner.borrow().gradient, 0.5);
+        assert_float_relative_eq!(w1.inner.borrow().gradient, 0.25);
+        assert_float_relative_eq!(w2.inner.borrow().gradient, 0.0);
     }
 }
