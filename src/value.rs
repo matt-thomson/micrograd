@@ -12,6 +12,7 @@ enum Children {
     None,
     Add(Value, Value),
     Mul(Value, Value),
+    Tanh(Value),
 }
 
 impl From<f64> for Value {
@@ -44,6 +45,18 @@ impl Mul<Value> for Value {
             data: self.data * rhs.data,
             grad: 0.0,
             prev: Box::new(Children::Mul(self, rhs)),
+        }
+    }
+}
+
+impl Value {
+    pub fn tanh(self) -> Value {
+        let exp = (self.data * 2.0).exp();
+
+        Value {
+            data: (exp - 1.0) / (exp + 1.0),
+            grad: 0.0,
+            prev: Box::new(Children::Tanh(self)),
         }
     }
 }

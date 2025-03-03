@@ -3,21 +3,22 @@ use micrograd::Value;
 fn main() {
     let h = 0.00001;
 
-    let l1 = calculate_l(0.0);
-    let l2 = calculate_l(h);
+    let n1 = calculate_neuron(0.0);
+    let n2 = calculate_neuron(h);
 
-    let grad = (l2 - l1) / h;
+    let grad = (n2 - n1) / h;
     dbg!(grad);
 }
 
-fn calculate_l(h: f64) -> f64 {
-    let a: Value = (2.0 + h).into();
-    let b: Value = (-3.0).into();
-    let c: Value = 10.0.into();
-    let d = a * b + c;
-    let f: Value = (-2.0).into();
+fn calculate_neuron(h: f64) -> f64 {
+    let x1: Value = (2.0).into();
+    let x2: Value = (0.0).into();
+    let w1: Value = (-3.0 + h).into();
+    let w2: Value = (1.0).into();
+    let b: Value = (6.7).into();
 
-    let l = d * f;
+    let n = (x1 * w1) + (x2 * w2) + b;
+    let o = n.tanh();
 
-    l.data
+    o.data
 }
