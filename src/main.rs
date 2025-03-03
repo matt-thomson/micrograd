@@ -14,4 +14,11 @@ fn main() {
 
     let predictions = xs.map(|x| mlp.predict(&x)[0].value());
     dbg!(predictions);
+
+    let loss = predictions
+        .iter()
+        .zip(ys)
+        .fold(0.0, |acc, (pred, y)| acc + (pred - y).powi(2));
+
+    dbg!(loss);
 }
