@@ -12,6 +12,6 @@ fn main() {
 
     let ys = [1.0, -1.0, 1.0, -1.0];
 
-    let predictions = xs.map(|x| mlp.calculate(&x)[0].value());
+    let predictions = xs.map(|x| mlp.predict(&x)[0].value());
     dbg!(predictions);
 }

@@ -15,7 +15,7 @@ impl MLP {
         }
     }
 
-    pub fn calculate(&self, xs: &[Value]) -> Vec<Value> {
+    pub fn predict(&self, xs: &[Value]) -> Vec<Value> {
         let first = self.layers[0].calculate(xs);
 
         self.layers[1..]
