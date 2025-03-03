@@ -77,7 +77,7 @@ impl Distribution<Value> for StandardUniform {
 }
 
 impl Value {
-    fn value(&self) -> f64 {
+    pub fn value(&self) -> f64 {
         self.inner.borrow().value
     }
 
