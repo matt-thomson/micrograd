@@ -9,9 +9,9 @@ pub struct Value {
 
 #[derive(Debug)]
 struct ValueInner {
-    data: f64,
-    grad: f64,
-    prev: Operation,
+    value: f64,
+    gradient: f64,
+    operation: Operation,
 }
 
 #[derive(Debug)]
@@ -33,9 +33,9 @@ impl From<ValueInner> for Value {
 impl From<f64> for Value {
     fn from(data: f64) -> Self {
         ValueInner {
-            data,
-            grad: 0.0,
-            prev: Operation::Constant,
+            value: data,
+            gradient: 0.0,
+            operation: Operation::Constant,
         }
         .into()
     }
@@ -46,9 +46,9 @@ impl Add<Value> for Value {
 
     fn add(self, rhs: Value) -> Self::Output {
         ValueInner {
-            data: self.data() + rhs.data(),
-            grad: 0.0,
-            prev: Operation::Add(self.inner.clone(), rhs.inner.clone()),
+            value: self.value() + rhs.value(),
+            gradient: 0.0,
+            operation: Operation::Add(self.inner.clone(), rhs.inner.clone()),
         }
         .into()
     }
@@ -59,26 +59,26 @@ impl Mul<Value> for Value {
 
     fn mul(self, rhs: Value) -> Self::Output {
         ValueInner {
-            data: self.data() * rhs.data(),
-            grad: 0.0,
-            prev: Operation::Mul(self.inner.clone(), rhs.inner.clone()),
+            value: self.value() * rhs.value(),
+            gradient: 0.0,
+            operation: Operation::Mul(self.inner.clone(), rhs.inner.clone()),
         }
         .into()
     }
 }
 
 impl Value {
-    pub fn data(&self) -> f64 {
-        self.inner.borrow().data
+    pub fn value(&self) -> f64 {
+        self.inner.borrow().value
     }
 
     pub fn tanh(self) -> Value {
-        let exp = (self.data() * 2.0).exp();
+        let exp = (self.value() * 2.0).exp();
 
         ValueInner {
-            data: (exp - 1.0) / (exp + 1.0),
-            grad: 0.0,
-            prev: Operation::Tanh(self.inner.clone()),
+            value: (exp - 1.0) / (exp + 1.0),
+            gradient: 0.0,
+            operation: Operation::Tanh(self.inner.clone()),
         }
         .into()
     }
@@ -100,7 +100,7 @@ mod tests {
 
         let l = d * f;
 
-        assert_eq!(l.data(), -8.0);
+        assert_eq!(l.value(), -8.0);
     }
 
     #[test]
@@ -109,6 +109,6 @@ mod tests {
 
         let result = a.tanh();
 
-        assert_float_relative_eq!(result.data(), 0.96402758008);
+        assert_float_relative_eq!(result.value(), 0.96402758008);
     }
 }

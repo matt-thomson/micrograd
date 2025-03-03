@@ -20,5 +20,5 @@ fn calculate_neuron(h: f64) -> f64 {
     let n = (x1 * w1) + (x2 * w2) + b;
     let o = n.tanh();
 
-    o.data()
+    o.value()
 }
