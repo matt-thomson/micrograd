@@ -22,6 +22,7 @@ enum Operation {
     Add(Rc<RefCell<ValueInner>>, Rc<RefCell<ValueInner>>),
     Sub(Rc<RefCell<ValueInner>>, Rc<RefCell<ValueInner>>),
     Mul(Rc<RefCell<ValueInner>>, Rc<RefCell<ValueInner>>),
+    Pow(Rc<RefCell<ValueInner>>, f64),
     Tanh(Rc<RefCell<ValueInner>>),
 }
 
@@ -95,6 +96,15 @@ impl Value {
         self.inner.borrow().value
     }
 
+    pub fn pow(self, exponent: f64) -> Value {
+        ValueInner {
+            value: self.value().powf(exponent),
+            gradient: 0.0,
+            operation: Operation::Pow(self.inner.clone(), exponent),
+        }
+        .into()
+    }
+
     pub fn tanh(self) -> Value {
         let exp = (self.value() * 2.0).exp();
 
@@ -136,6 +146,14 @@ impl ValueInner {
 
                 left.borrow().backward();
                 right.borrow().backward();
+            }
+            Operation::Pow(base, exponent) => {
+                let base_value = base.borrow().value;
+
+                base.borrow_mut().gradient +=
+                    self.gradient * exponent * base_value.powf(exponent - 1.0);
+
+                base.borrow().backward();
             }
             Operation::Tanh(value) => {
                 value.borrow_mut().gradient += self.gradient * (1.0 - self.value.powi(2));
@@ -212,5 +230,15 @@ mod tests {
 
         assert_float_relative_eq!(a.inner.borrow().gradient, 1.0);
         assert_float_relative_eq!(b.inner.borrow().gradient, -1.0);
+    }
+
+    #[test]
+    fn should_differentiate_pow() {
+        let a: Value = 2.0.into();
+
+        let result = a.clone().pow(3.0);
+        result.backward();
+
+        assert_float_relative_eq!(a.inner.borrow().gradient, 12.0);
     }
 }
