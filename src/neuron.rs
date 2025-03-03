@@ -15,7 +15,7 @@ impl Neuron {
         }
     }
 
-    pub fn calculate(&self, xs: Vec<Value>) -> Value {
+    pub fn calculate(&self, xs: &[Value]) -> Value {
         self.weights
             .iter()
             .zip(xs)
