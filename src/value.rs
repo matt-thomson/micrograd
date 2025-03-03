@@ -63,6 +63,8 @@ impl Value {
 
 #[cfg(test)]
 mod tests {
+    use assert_float_eq::assert_float_relative_eq;
+
     use crate::value::Value;
 
     #[test]
@@ -76,5 +78,14 @@ mod tests {
         let l = d * f;
 
         assert_eq!(l.data, -8.0);
+    }
+
+    #[test]
+    fn should_calculate_tanh() {
+        let a: Value = (2.0).into();
+
+        let result = a.tanh();
+
+        assert_float_relative_eq!(result.data, 0.96402758008);
     }
 }
