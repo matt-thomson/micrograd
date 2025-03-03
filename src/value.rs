@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::ops::{Add, Mul};
+use std::ops::{Add, Mul, Sub};
 use std::rc::Rc;
 
 use rand::distr::{Distribution, StandardUniform};
@@ -20,6 +20,7 @@ struct ValueInner {
 enum Operation {
     Constant,
     Add(Rc<RefCell<ValueInner>>, Rc<RefCell<ValueInner>>),
+    Sub(Rc<RefCell<ValueInner>>, Rc<RefCell<ValueInner>>),
     Mul(Rc<RefCell<ValueInner>>, Rc<RefCell<ValueInner>>),
     Tanh(Rc<RefCell<ValueInner>>),
 }
@@ -51,6 +52,19 @@ impl Add<Value> for Value {
             value: self.value() + rhs.value(),
             gradient: 0.0,
             operation: Operation::Add(self.inner.clone(), rhs.inner.clone()),
+        }
+        .into()
+    }
+}
+
+impl Sub<Value> for Value {
+    type Output = Value;
+
+    fn sub(self, rhs: Value) -> Self::Output {
+        ValueInner {
+            value: self.value() - rhs.value(),
+            gradient: 0.0,
+            operation: Operation::Sub(self.inner.clone(), rhs.inner.clone()),
         }
         .into()
     }
@@ -105,6 +119,13 @@ impl ValueInner {
             Operation::Add(left, right) => {
                 left.borrow_mut().gradient += self.gradient;
                 right.borrow_mut().gradient += self.gradient;
+
+                left.borrow().backward();
+                right.borrow().backward();
+            }
+            Operation::Sub(left, right) => {
+                left.borrow_mut().gradient += self.gradient;
+                right.borrow_mut().gradient -= self.gradient;
 
                 left.borrow().backward();
                 right.borrow().backward();
@@ -179,5 +200,17 @@ mod tests {
         b.backward();
 
         assert_float_relative_eq!(a.inner.borrow().gradient, 2.0);
+    }
+
+    #[test]
+    fn should_differentiate_sub() {
+        let a: Value = 2.0.into();
+        let b: Value = 3.0.into();
+
+        let result = a.clone() - b.clone();
+        result.backward();
+
+        assert_float_relative_eq!(a.inner.borrow().gradient, 1.0);
+        assert_float_relative_eq!(b.inner.borrow().gradient, -1.0);
     }
 }
