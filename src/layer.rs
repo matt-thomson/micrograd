@@ -17,4 +17,8 @@ impl Layer {
             .map(|neuron| neuron.calculate(xs))
             .collect()
     }
+
+    pub fn step(&self, epsilon: f64) {
+        self.neurons.iter().for_each(|neuron| neuron.step(epsilon));
+    }
 }

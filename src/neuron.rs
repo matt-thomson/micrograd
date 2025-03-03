@@ -22,4 +22,9 @@ impl Neuron {
             .fold(self.bias.clone(), |acc, (w, x)| acc + w.clone() * x.clone())
             .tanh()
     }
+
+    pub fn step(&self, epsilon: f64) {
+        self.weights.iter().for_each(|weight| weight.step(epsilon));
+        self.bias.step(epsilon);
+    }
 }

@@ -22,4 +22,8 @@ impl MLP {
             .iter()
             .fold(first, |acc, layer| layer.calculate(&acc))
     }
+
+    pub fn step(&self, epsilon: f64) {
+        self.layers.iter().for_each(|layer| layer.step(epsilon));
+    }
 }

@@ -120,6 +120,13 @@ impl Value {
         self.inner.borrow_mut().gradient = 1.0;
         self.inner.borrow().backward();
     }
+
+    pub fn step(&self, epsilon: f64) {
+        let increment = self.inner.borrow().gradient * epsilon;
+
+        self.inner.borrow_mut().value -= increment;
+        self.inner.borrow_mut().gradient = 0.0;
+    }
 }
 
 impl ValueInner {
