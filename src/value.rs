@@ -1,26 +1,37 @@
+use std::cell::RefCell;
 use std::ops::{Add, Mul};
+use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct Value {
-    pub data: f64,
+    inner: Rc<RefCell<ValueInner>>,
+}
+
+#[derive(Debug)]
+struct ValueInner {
+    data: f64,
     grad: f64,
-    prev: Box<Operation>,
+    prev: Operation,
 }
 
 #[derive(Debug)]
 enum Operation {
     Constant,
-    Add(Value, Value),
-    Mul(Value, Value),
-    Tanh(Value),
+    Add(Rc<RefCell<ValueInner>>, Rc<RefCell<ValueInner>>),
+    Mul(Rc<RefCell<ValueInner>>, Rc<RefCell<ValueInner>>),
+    Tanh(Rc<RefCell<ValueInner>>),
 }
 
 impl From<f64> for Value {
     fn from(data: f64) -> Self {
-        Value {
+        let inner = ValueInner {
             data,
             grad: 0.0,
-            prev: Box::new(Operation::Constant),
+            prev: Operation::Constant,
+        };
+
+        Value {
+            inner: Rc::new(RefCell::new(inner)),
         }
     }
 }
@@ -29,10 +40,14 @@ impl Add<Value> for Value {
     type Output = Value;
 
     fn add(self, rhs: Value) -> Self::Output {
-        Value {
-            data: self.data + rhs.data,
+        let inner = ValueInner {
+            data: self.data() + rhs.data(),
             grad: 0.0,
-            prev: Box::new(Operation::Add(self, rhs)),
+            prev: Operation::Add(self.inner.clone(), rhs.inner.clone()),
+        };
+
+        Value {
+            inner: Rc::new(RefCell::new(inner)),
         }
     }
 }
@@ -41,22 +56,34 @@ impl Mul<Value> for Value {
     type Output = Value;
 
     fn mul(self, rhs: Value) -> Self::Output {
-        Value {
-            data: self.data * rhs.data,
+        let inner = ValueInner {
+            data: self.data() * rhs.data(),
             grad: 0.0,
-            prev: Box::new(Operation::Mul(self, rhs)),
+            prev: Operation::Mul(self.inner.clone(), rhs.inner.clone()),
+        };
+
+        Value {
+            inner: Rc::new(RefCell::new(inner)),
         }
     }
 }
 
 impl Value {
-    pub fn tanh(self) -> Value {
-        let exp = (self.data * 2.0).exp();
+    pub fn data(&self) -> f64 {
+        self.inner.borrow().data
+    }
 
-        Value {
+    pub fn tanh(self) -> Value {
+        let exp = (self.data() * 2.0).exp();
+
+        let inner = ValueInner {
             data: (exp - 1.0) / (exp + 1.0),
             grad: 0.0,
-            prev: Box::new(Operation::Tanh(self)),
+            prev: Operation::Tanh(self.inner.clone()),
+        };
+
+        Value {
+            inner: Rc::new(RefCell::new(inner)),
         }
     }
 }
@@ -77,7 +104,7 @@ mod tests {
 
         let l = d * f;
 
-        assert_eq!(l.data, -8.0);
+        assert_eq!(l.data(), -8.0);
     }
 
     #[test]
@@ -86,6 +113,6 @@ mod tests {
 
         let result = a.tanh();
 
-        assert_float_relative_eq!(result.data, 0.96402758008);
+        assert_float_relative_eq!(result.data(), 0.96402758008);
     }
 }
