@@ -3,6 +3,7 @@ use std::ops::{Add, Mul};
 #[derive(Debug)]
 pub struct Value {
     data: f32,
+    grad: f32,
     prev: Box<Children>,
 }
 
@@ -17,6 +18,7 @@ impl From<f32> for Value {
     fn from(data: f32) -> Self {
         Value {
             data,
+            grad: 0.0,
             prev: Box::new(Children::None),
         }
     }
@@ -28,6 +30,7 @@ impl Add<Value> for Value {
     fn add(self, rhs: Value) -> Self::Output {
         Value {
             data: self.data + rhs.data,
+            grad: 0.0,
             prev: Box::new(Children::Add(self, rhs)),
         }
     }
@@ -39,6 +42,7 @@ impl Mul<Value> for Value {
     fn mul(self, rhs: Value) -> Self::Output {
         Value {
             data: self.data * rhs.data,
+            grad: 0.0,
             prev: Box::new(Children::Mul(self, rhs)),
         }
     }
