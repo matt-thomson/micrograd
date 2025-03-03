@@ -22,17 +22,22 @@ enum Operation {
     Tanh(Rc<RefCell<ValueInner>>),
 }
 
-impl From<f64> for Value {
-    fn from(data: f64) -> Self {
-        let inner = ValueInner {
-            data,
-            grad: 0.0,
-            prev: Operation::Constant,
-        };
-
+impl From<ValueInner> for Value {
+    fn from(inner: ValueInner) -> Self {
         Value {
             inner: Rc::new(RefCell::new(inner)),
         }
+    }
+}
+
+impl From<f64> for Value {
+    fn from(data: f64) -> Self {
+        ValueInner {
+            data,
+            grad: 0.0,
+            prev: Operation::Constant,
+        }
+        .into()
     }
 }
 
@@ -40,15 +45,12 @@ impl Add<Value> for Value {
     type Output = Value;
 
     fn add(self, rhs: Value) -> Self::Output {
-        let inner = ValueInner {
+        ValueInner {
             data: self.data() + rhs.data(),
             grad: 0.0,
             prev: Operation::Add(self.inner.clone(), rhs.inner.clone()),
-        };
-
-        Value {
-            inner: Rc::new(RefCell::new(inner)),
         }
+        .into()
     }
 }
 
@@ -56,15 +58,12 @@ impl Mul<Value> for Value {
     type Output = Value;
 
     fn mul(self, rhs: Value) -> Self::Output {
-        let inner = ValueInner {
+        ValueInner {
             data: self.data() * rhs.data(),
             grad: 0.0,
             prev: Operation::Mul(self.inner.clone(), rhs.inner.clone()),
-        };
-
-        Value {
-            inner: Rc::new(RefCell::new(inner)),
         }
+        .into()
     }
 }
 
@@ -76,15 +75,12 @@ impl Value {
     pub fn tanh(self) -> Value {
         let exp = (self.data() * 2.0).exp();
 
-        let inner = ValueInner {
+        ValueInner {
             data: (exp - 1.0) / (exp + 1.0),
             grad: 0.0,
             prev: Operation::Tanh(self.inner.clone()),
-        };
-
-        Value {
-            inner: Rc::new(RefCell::new(inner)),
         }
+        .into()
     }
 }
 
