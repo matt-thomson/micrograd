@@ -2,7 +2,7 @@ use std::ops::{Add, Mul};
 
 #[derive(Debug)]
 pub struct Value {
-    data: f32,
+    pub data: f32,
     grad: f32,
     prev: Box<Children>,
 }
