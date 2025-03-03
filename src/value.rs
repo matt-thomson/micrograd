@@ -4,12 +4,12 @@ use std::ops::{Add, Mul};
 pub struct Value {
     pub data: f64,
     grad: f64,
-    prev: Box<Children>,
+    prev: Box<Operation>,
 }
 
 #[derive(Debug)]
-enum Children {
-    None,
+enum Operation {
+    Constant,
     Add(Value, Value),
     Mul(Value, Value),
     Tanh(Value),
@@ -20,7 +20,7 @@ impl From<f64> for Value {
         Value {
             data,
             grad: 0.0,
-            prev: Box::new(Children::None),
+            prev: Box::new(Operation::Constant),
         }
     }
 }
@@ -32,7 +32,7 @@ impl Add<Value> for Value {
         Value {
             data: self.data + rhs.data,
             grad: 0.0,
-            prev: Box::new(Children::Add(self, rhs)),
+            prev: Box::new(Operation::Add(self, rhs)),
         }
     }
 }
@@ -44,7 +44,7 @@ impl Mul<Value> for Value {
         Value {
             data: self.data * rhs.data,
             grad: 0.0,
-            prev: Box::new(Children::Mul(self, rhs)),
+            prev: Box::new(Operation::Mul(self, rhs)),
         }
     }
 }
@@ -56,7 +56,7 @@ impl Value {
         Value {
             data: (exp - 1.0) / (exp + 1.0),
             grad: 0.0,
-            prev: Box::new(Children::Tanh(self)),
+            prev: Box::new(Operation::Tanh(self)),
         }
     }
 }
