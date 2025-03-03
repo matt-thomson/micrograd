@@ -14,4 +14,12 @@ impl Neuron {
             bias: random(),
         }
     }
+
+    pub fn calculate(&self, xs: Vec<Value>) -> Value {
+        self.weights
+            .iter()
+            .zip(xs)
+            .fold(self.bias.clone(), |acc, (w, x)| acc + w.clone() * x.clone())
+            .tanh()
+    }
 }
