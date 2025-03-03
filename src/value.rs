@@ -34,7 +34,7 @@ impl From<f64> for Value {
     fn from(data: f64) -> Self {
         ValueInner {
             value: data,
-            gradient: 0.0,
+            gradient: 1.0,
             operation: Operation::Constant,
         }
         .into()
@@ -47,7 +47,7 @@ impl Add<Value> for Value {
     fn add(self, rhs: Value) -> Self::Output {
         ValueInner {
             value: self.value() + rhs.value(),
-            gradient: 0.0,
+            gradient: 1.0,
             operation: Operation::Add(self.inner.clone(), rhs.inner.clone()),
         }
         .into()
@@ -60,7 +60,7 @@ impl Mul<Value> for Value {
     fn mul(self, rhs: Value) -> Self::Output {
         ValueInner {
             value: self.value() * rhs.value(),
-            gradient: 0.0,
+            gradient: 1.0,
             operation: Operation::Mul(self.inner.clone(), rhs.inner.clone()),
         }
         .into()
@@ -81,7 +81,7 @@ impl Value {
 
         ValueInner {
             value: (exp - 1.0) / (exp + 1.0),
-            gradient: 0.0,
+            gradient: 1.0,
             operation: Operation::Tanh(self.inner.clone()),
         }
         .into()
@@ -99,7 +99,7 @@ impl Value {
                 right.borrow_mut().gradient = self.gradient() * left.borrow().gradient;
             }
             Operation::Tanh(value) => {
-                value.borrow_mut().gradient = self.gradient() * (1.0 - self.value());
+                value.borrow_mut().gradient = self.gradient() * (1.0 - self.value().powi(2));
             }
         }
     }
