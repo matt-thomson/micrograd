@@ -34,7 +34,7 @@ impl From<f64> for Value {
     fn from(data: f64) -> Self {
         ValueInner {
             value: data,
-            gradient: 1.0,
+            gradient: 0.0,
             operation: Operation::Constant,
         }
         .into()
@@ -94,21 +94,21 @@ impl ValueInner {
         match &self.operation {
             Operation::Constant => {}
             Operation::Add(left, right) => {
-                left.borrow_mut().gradient = self.gradient;
-                right.borrow_mut().gradient = self.gradient;
+                left.borrow_mut().gradient += self.gradient;
+                right.borrow_mut().gradient += self.gradient;
 
                 left.borrow().backward();
                 right.borrow().backward();
             }
             Operation::Mul(left, right) => {
-                left.borrow_mut().gradient = self.gradient * right.borrow().value;
-                right.borrow_mut().gradient = self.gradient * left.borrow().value;
+                left.borrow_mut().gradient += self.gradient * right.borrow().value;
+                right.borrow_mut().gradient += self.gradient * left.borrow().value;
 
                 left.borrow().backward();
                 right.borrow().backward();
             }
             Operation::Tanh(value) => {
-                value.borrow_mut().gradient = self.gradient * (1.0 - self.value.powi(2));
+                value.borrow_mut().gradient += self.gradient * (1.0 - self.value.powi(2));
 
                 value.borrow().backward();
             }
@@ -160,5 +160,15 @@ mod tests {
         assert_float_relative_eq!(n.inner.borrow().gradient, 0.5);
         assert_float_relative_eq!(w1.inner.borrow().gradient, 1.0);
         assert_float_relative_eq!(w2.inner.borrow().gradient, 0.0);
+    }
+
+    #[test]
+    fn should_handle_same_node_twice() {
+        let a: Value = 3.0.into();
+        let b = a.clone() + a.clone();
+
+        b.backward();
+
+        assert_float_relative_eq!(a.inner.borrow().gradient, 2.0);
     }
 }
