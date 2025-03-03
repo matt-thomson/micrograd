@@ -88,18 +88,32 @@ impl Value {
     }
 
     pub fn backward(&self) {
-        match &self.inner.borrow().operation {
+        self.inner.borrow().backward();
+    }
+}
+
+impl ValueInner {
+    pub fn backward(&self) {
+        match &self.operation {
             Operation::Constant => {}
             Operation::Add(left, right) => {
-                left.borrow_mut().gradient = self.gradient();
-                right.borrow_mut().gradient = self.gradient();
+                left.borrow_mut().gradient = self.gradient;
+                right.borrow_mut().gradient = self.gradient;
+
+                left.borrow().backward();
+                right.borrow().backward();
             }
             Operation::Mul(left, right) => {
-                left.borrow_mut().gradient = self.gradient() * right.borrow().gradient;
-                right.borrow_mut().gradient = self.gradient() * left.borrow().gradient;
+                left.borrow_mut().gradient = self.gradient * right.borrow().gradient;
+                right.borrow_mut().gradient = self.gradient * left.borrow().gradient;
+
+                left.borrow().backward();
+                right.borrow().backward();
             }
             Operation::Tanh(value) => {
-                value.borrow_mut().gradient = self.gradient() * (1.0 - self.value().powi(2));
+                value.borrow_mut().gradient = self.gradient * (1.0 - self.value.powi(2));
+
+                value.borrow().backward();
             }
         }
     }
@@ -147,5 +161,7 @@ mod tests {
         o.backward();
 
         assert_float_relative_eq!(n.gradient(), 0.5);
+        assert_float_relative_eq!(w1.gradient(), 0.25);
+        assert_float_relative_eq!(w2.gradient(), 0.0);
     }
 }
