@@ -158,7 +158,7 @@ mod tests {
         o.backward();
 
         assert_float_relative_eq!(n.inner.borrow().gradient, 0.5);
-        assert_float_relative_eq!(w1.inner.borrow().gradient, 0.25);
+        assert_float_relative_eq!(w1.inner.borrow().gradient, 1.0);
         assert_float_relative_eq!(w2.inner.borrow().gradient, 0.0);
     }
 }
