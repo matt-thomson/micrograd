@@ -2,8 +2,8 @@ use std::ops::{Add, Mul};
 
 #[derive(Debug)]
 pub struct Value {
-    pub data: f32,
-    grad: f32,
+    pub data: f64,
+    grad: f64,
     prev: Box<Children>,
 }
 
@@ -14,8 +14,8 @@ enum Children {
     Mul(Value, Value),
 }
 
-impl From<f32> for Value {
-    fn from(data: f32) -> Self {
+impl From<f64> for Value {
+    fn from(data: f64) -> Self {
         Value {
             data,
             grad: 0.0,
