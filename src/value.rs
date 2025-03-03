@@ -2,6 +2,8 @@ use std::cell::RefCell;
 use std::ops::{Add, Mul};
 use std::rc::Rc;
 
+use rand::distr::{Distribution, StandardUniform};
+
 #[derive(Debug, Clone)]
 pub struct Value {
     inner: Rc<RefCell<ValueInner>>,
@@ -64,6 +66,13 @@ impl Mul<Value> for Value {
             operation: Operation::Mul(self.inner.clone(), rhs.inner.clone()),
         }
         .into()
+    }
+}
+
+impl Distribution<Value> for StandardUniform {
+    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Value {
+        let value: f64 = rng.random();
+        (value * 2.0 - 1.0).into()
     }
 }
 
