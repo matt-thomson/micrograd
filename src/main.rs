@@ -1,4 +1,4 @@
-use micrograd::MLP;
+use micrograd::{MLP, Value};
 
 fn main() {
     let mlp = MLP::new(3, &[4, 4, 1]);
@@ -10,15 +10,16 @@ fn main() {
         [1.0.into(), 1.0.into(), 1.0.into()],
     ];
 
-    let ys = [1.0, -1.0, 1.0, -1.0];
+    let ys = [1.0.into(), (-1.0).into(), 1.0.into(), (-1.0).into()];
 
-    let predictions = xs.map(|x| mlp.predict(&x)[0].value());
-    dbg!(predictions);
+    let predictions = xs.map(|x| mlp.predict(&x)[0].clone());
 
     let loss = predictions
-        .iter()
+        .into_iter()
         .zip(ys)
-        .fold(0.0, |acc, (pred, y)| acc + (pred - y).powi(2));
+        .fold(0.0.into(), |acc: Value, (pred, y)| {
+            acc + (pred - y).pow(2.0)
+        });
 
-    dbg!(loss);
+    dbg!(loss.value());
 }
